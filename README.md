@@ -1,3 +1,3 @@
 # FarkleScoreKeeper
 
-![screenshot](screenshot.png)
+![screenshot](screenshot.PNG)
