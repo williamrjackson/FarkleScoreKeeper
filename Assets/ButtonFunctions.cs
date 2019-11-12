@@ -26,6 +26,7 @@ public class ButtonFunctions : MonoBehaviour
     private int p1Score = 0;
     private int p2Score = 0;
 
+    private bool winState = false;
     private bool player1Turn = true;
     private void TogglePlayer()
     {
@@ -52,23 +53,39 @@ public class ButtonFunctions : MonoBehaviour
 
     void Start()
     {
-        p2Name.color = Color.black;
-        p1Name.color = Color.blue;
-        currentFill = p1Fill;
-        currentName = p1Name;
-        currentScoreText = p1ScoreText;
+        Reset();
+    }
+
+    private void Reset()
+    {
+        Clear();
 
         p1ScoreText.text = "0";
         p2ScoreText.text = "0";
+        p1Score = 0;
+        p2Score = 0;
+        
+        p1Name.color = Color.blue;
+        p2Name.color = Color.black;
+        currentFill = p1Fill;
+        currentName = p1Name;
+        currentScoreText = p1ScoreText;
+        currentScore = 0;
+        player1Turn = true;
 
         p2Fill.fillAmount = 0f;
         p1Fill.fillAmount = 0f;
 
-        Clear();
+        winState = false;
     }
-
     public void Farkle()
     {
+        if (winState) 
+        {
+            Reset();
+            return;
+        }
+
         if (player1Turn)
         {
             p1ConsecutiveFarkles++;
@@ -87,6 +104,7 @@ public class ButtonFunctions : MonoBehaviour
                 FarklePenalty();
             }
         }
+        CheckForWin();
         TogglePlayer();
     }
 
@@ -94,10 +112,18 @@ public class ButtonFunctions : MonoBehaviour
     {
         SetScore(currentScore - 1000); 
     }
+
     public void Bank()
     {
+        if (winState) 
+        {
+            Reset();
+            return;
+        }
+
         int toAdd;
         int.TryParse(editField.text, out toAdd);
+        if (toAdd == 0) return;
         int sum = (currentScore + toAdd);
         SetScore(sum);
         StartCoroutine(GradualFill(currentFill, sum));
@@ -110,11 +136,40 @@ public class ButtonFunctions : MonoBehaviour
         {
             p2ConsecutiveFarkles = 0;
         }
+
+        CheckForWin();
+
         TogglePlayer();
+    }
+
+    private void CheckForWin()
+    {
+        if (p1Score < 10000 && p2Score < 10000)
+        {
+            return;
+        }
+        
+        if (player1Turn)
+        {
+            if (p2Score > p1Score)
+            {
+                editField.text = p2Name.text + " Wins!";
+                winState = true;
+            }
+        }
+        else
+        {
+            if (p1Score > p2Score)
+            {
+                editField.text = p1Name.text + " Wins!";
+                winState = true;
+            }
+        }
     }
 
     private void SetScore(int newScore)
     {
+        currentScore = newScore;
         if(player1Turn)
         {
             p1Score = newScore;
@@ -133,7 +188,8 @@ public class ButtonFunctions : MonoBehaviour
     }
     public void Backspace()
     {
-        editField.text = editField.text.Substring(0, editField.text.Length - 1);
+        if (editField.text.Length > 0)
+            editField.text = editField.text.Substring(0, editField.text.Length - 1);
     }
     public void Clear()
     {
