@@ -6,78 +6,81 @@ using UnityEngine.UI;
 public class ButtonFunctions : MonoBehaviour
 {
     public InputField editField;
+    public EditPlayerName playerPrefab;
+    public Transform playerParent;
 
-    [Header("Player One")]
-    public Image p1Fill;
-    public Text p1ScoreText;
-    public Text p1Name;
-    [Header("Player Two")]
-    public Image p2Fill;
-    public Text p2ScoreText;
-    public Text p2Name;
-
-    private Image currentFill;
-    private Text currentScoreText;
-    private int currentScore;
-    private Text currentName;
-
-    private int p1ConsecutiveFarkles = 0;
-    private int p2ConsecutiveFarkles = 0;
-    private int p1Score = 0;
-    private int p2Score = 0;
+    private EditPlayerName currentPlayer;
 
     private bool winState = false;
-    private bool player1Turn = true;
+    private List<EditPlayerName> players = new List<EditPlayerName>();
+
     private void TogglePlayer()
     {
-        player1Turn = !player1Turn;
-        if (player1Turn)
+        int nextPlayerIndex = (players.IndexOf(currentPlayer) + 1) % players.Count;
+        currentPlayer = players[nextPlayerIndex];
+
+        for (int i = 0; i < players.Count; i++)
         {
-            p2Name.color = Color.black;
-            p1Name.color = Color.blue;
-            currentFill = p1Fill;
-            currentName = p1Name;
-            currentScoreText = p1ScoreText;
-            currentScore = p1Score;
-        }
-        else
-        {
-            p1Name.color = Color.black;
-            p2Name.color = Color.blue;
-            currentFill = p2Fill;
-            currentName = p2Name;
-            currentScoreText = p2ScoreText;
-            currentScore = p2Score;
-        }        
+            if (i == nextPlayerIndex)
+            {
+                players[i].name.color = Color.blue;
+            }
+            else
+            {
+                players[i].name.color = Color.black;
+            }
+        }    
     }
 
     void Start()
     {
-        Reset();
+        AddPlayer("Player 1");
+        AddPlayer("Player 2");
     }
 
     private void Reset()
     {
         Clear();
 
-        p1ScoreText.text = "0";
-        p2ScoreText.text = "0";
-        p1Score = 0;
-        p2Score = 0;
-        
-        p1Name.color = Color.blue;
-        p2Name.color = Color.black;
-        currentFill = p1Fill;
-        currentName = p1Name;
-        currentScoreText = p1ScoreText;
-        currentScore = 0;
-        player1Turn = true;
+        currentPlayer = players[0];
 
-        p2Fill.fillAmount = 0f;
-        p1Fill.fillAmount = 0f;
+        for (int i = 0; i < players.Count; i++)
+        {
 
+            if (i == 0)
+            {
+                players[i].name.color = Color.blue;
+            }
+            else
+            {
+                players[i].name.color = Color.black;
+            }
+
+            players[i].scoreText.text = "0";
+            players[i].score = 0;
+            players[i].fill.fillAmount = 0f;
+        }
         winState = false;
     }
+
+    public void AddPlayer(string initialName)
+    {
+        EditPlayerName newPlayer = Instantiate(playerPrefab, playerParent);
+        newPlayer.name.text = initialName;
+        players.Add(newPlayer);
+        Reset();
+    }
+
+    public void RemovePlayer()
+    {
+        if (players.Count == 0)
+            return;
+
+        EditPlayerName playerToRemove = players[players.Count - 1];
+        players.Remove(playerToRemove);
+        Destroy(playerToRemove.gameObject);
+    }
+
     public void Farkle()
     {
         if (winState) 
@@ -86,31 +89,20 @@ public class ButtonFunctions : MonoBehaviour
             return;
         }
 
-        if (player1Turn)
+        currentPlayer.consecutiveFarkles++;
+        if (currentPlayer.consecutiveFarkles > 2)
         {
-            p1ConsecutiveFarkles++;
-            if (p1ConsecutiveFarkles > 2)
-            {
-                p1ConsecutiveFarkles = 0;
-                FarklePenalty();
-            }
+            currentPlayer.consecutiveFarkles = 0;
+            FarklePenalty();
         }
-        else
-        {
-            p2ConsecutiveFarkles++;
-            if (p2ConsecutiveFarkles > 2)
-            {
-                p2ConsecutiveFarkles = 0;
-                FarklePenalty();
-            }
-        }
+
         CheckForWin();
         TogglePlayer();
     }
 
     private void FarklePenalty()
     {
-        SetScore(currentScore - 1000); 
+        SetScore(currentPlayer.score - 1000); 
     }
 
     public void Bank()
@@ -124,18 +116,12 @@ public class ButtonFunctions : MonoBehaviour
         int toAdd;
         int.TryParse(editField.text, out toAdd);
         if (toAdd == 0) return;
-        int sum = (currentScore + toAdd);
+        int sum = (currentPlayer.score + toAdd);
         SetScore(sum);
-        StartCoroutine(GradualFill(currentFill, sum));
+        StartCoroutine(GradualFill(currentPlayer.fill, sum));
         Clear();
-        if (player1Turn)
-        {
-            p1ConsecutiveFarkles = 0;
-        }
-        else
-        {
-            p2ConsecutiveFarkles = 0;
-        }
+
+        currentPlayer.consecutiveFarkles = 0;
 
         CheckForWin();
 
@@ -144,42 +130,45 @@ public class ButtonFunctions : MonoBehaviour
 
     private void CheckForWin()
     {
-        if (p1Score < 10000 && p2Score < 10000)
+        EditPlayerName potentialWinner = null;
+        for (int i = 0; i < players.Count; i++)
+        {
+            if (players[i].score >= 10000)
+            {
+                if (potentialWinner == null || players[i].score > potentialWinner.score)
+                {
+                    potentialWinner = players[i];
+                }
+            }
+        }
+
+        // Nobody's in a potential win state - bail.
+        if (potentialWinner == null)
         {
             return;
         }
-        
-        if (player1Turn)
+
+        currentPlayer.hasLost = (currentPlayer.score < potentialWinner.score);
+
+        int loserCount = 0;
+        foreach (EditPlayerName player in players)
         {
-            if (p2Score > p1Score)
+            if (player.hasLost)
             {
-                editField.text = p2Name.text + " Wins!";
-                winState = true;
+                loserCount++;
             }
         }
-        else
+        if (loserCount == players.Count - 1)
         {
-            if (p1Score > p2Score)
-            {
-                editField.text = p1Name.text + " Wins!";
-                winState = true;
-            }
+            editField.text = potentialWinner.name.text + " Wins!";
+            winState = true;
         }
     }
 
     private void SetScore(int newScore)
     {
-        currentScore = newScore;
-        if(player1Turn)
-        {
-            p1Score = newScore;
-            p1ScoreText.text = p1Score.ToString();
-        }
-        else
-        {
-            p2Score = newScore;
-            p2ScoreText.text = p2Score.ToString();
-        }
+        currentPlayer.score = newScore;
+        currentPlayer.scoreText.text = currentPlayer.score.ToString();
     }
 
     public void AppendDigits(string digits)

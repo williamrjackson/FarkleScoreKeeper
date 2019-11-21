@@ -5,14 +5,27 @@ using UnityEngine.UI;
 
 public class EditPlayerName : MonoBehaviour
 {
-    public Text textDisplay;
+    public Text name;
+    public InputField input;
+    public Image fill;
+    public Text scoreText;
+    public int consecutiveFarkles = 0;
+    public int score = 0;
+    public bool hasLost = false;
+
+
     void Start()
     {
+        input.onEndEdit.AddListener(NameEdited);
     }
 
     public void EditName()
     {
-        Debug.Log("Button");
-        TouchScreenKeyboard.Open("", TouchScreenKeyboardType.Default, false, false, true);
+        input.ActivateInputField();
+    }
+
+    private void NameEdited(string newName)
+    {
+        name.text = newName;
     }
 }
