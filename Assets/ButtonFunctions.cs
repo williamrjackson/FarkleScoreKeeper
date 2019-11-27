@@ -8,6 +8,12 @@ public class ButtonFunctions : MonoBehaviour
     public InputField editField;
     public EditPlayerName playerPrefab;
     public Transform playerParent;
+    [Header("Audio")]
+    public AudioClip farkleAudio;
+    public AudioClip farklePenaltyAudio;
+    public AudioClip bankAudio;
+    public AudioClip clickAudio;
+    public AudioSource audioSource;
 
     private EditPlayerName currentPlayer;
 
@@ -95,6 +101,10 @@ public class ButtonFunctions : MonoBehaviour
             currentPlayer.consecutiveFarkles = 0;
             FarklePenalty();
         }
+        else
+        {
+            audioSource.PlayOneShot(farkleAudio);
+        }
 
         CheckForWin();
         TogglePlayer();
@@ -103,6 +113,7 @@ public class ButtonFunctions : MonoBehaviour
     private void FarklePenalty()
     {
         SetScore(currentPlayer.score - 1000); 
+        audioSource.PlayOneShot(farklePenaltyAudio);
     }
 
     public void Bank()
@@ -119,6 +130,7 @@ public class ButtonFunctions : MonoBehaviour
         int sum = (currentPlayer.score + toAdd);
         SetScore(sum);
         StartCoroutine(GradualFill(currentPlayer.fill, sum));
+        audioSource.PlayOneShot(bankAudio);
         Clear();
 
         currentPlayer.consecutiveFarkles = 0;
@@ -173,15 +185,18 @@ public class ButtonFunctions : MonoBehaviour
 
     public void AppendDigits(string digits)
     {
+        audioSource.PlayOneShot(clickAudio);
         editField.text = editField.text + digits;
     }
     public void Backspace()
     {
+        audioSource.PlayOneShot(clickAudio);
         if (editField.text.Length > 0)
             editField.text = editField.text.Substring(0, editField.text.Length - 1);
     }
     public void Clear()
     {
+        audioSource.PlayOneShot(clickAudio);
         editField.text = "";
     }
 
