@@ -2,4 +2,5 @@
 
 Farkle score keeper.    
 
-![screenshot](screenshot.png)
+![screenshot](screenshot.PNG)
+![settings screenshot](settings_screenshot.PNG)
