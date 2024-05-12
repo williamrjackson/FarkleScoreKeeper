@@ -21,6 +21,7 @@ public class Settings : MonoBehaviour
     public TMP_InputField twoTripletsField;
     public TMP_InputField farklePenaltyField;
     public TMP_InputField winningScoreField;
+    public TMP_InputField bankMinimumField;
     public Toggle piggyBackToggle;
     public Toggle fourOfAKindDblToggle;
     public Toggle fiveOfAKindDblToggle;
@@ -44,6 +45,7 @@ public class Settings : MonoBehaviour
     public static Setting fiveOfAKindDbl;
     public static Setting farklePenalty;
     public static Setting winningScore;
+    public static Setting bankMinimum;
     
     void Awake ()
     {
@@ -77,6 +79,7 @@ public class Settings : MonoBehaviour
         fiveOfAKindDbl = new Setting("FiveOfaKindDouble", 0);
         farklePenalty = new Setting("FarklePenalty", 500);
         winningScore = new Setting("WinningScore", 10000);
+        bankMinimum = new Setting("BankMinimum", 250);
         UpdateSettingsGUI();
     }
 
@@ -102,6 +105,7 @@ public class Settings : MonoBehaviour
         piggyBackToggle.isOn = piggyBack.Value == 1;
         fourOfAKindDblToggle.isOn = fourOfAKindDbl.Value == 1;
         fiveOfAKindDblToggle.isOn = fiveOfAKindDbl.Value == 1;
+        bankMinimumField.text = bankMinimum.Value.ToString();
     }
     public void SaveSettingsFromGUI()
     {
@@ -120,6 +124,7 @@ public class Settings : MonoBehaviour
         twoTriplets.Value = int.Parse(twoTripletsField.text);
         farklePenalty.Value = int.Parse(farklePenaltyField.text);
         winningScore.Value = int.Parse(winningScoreField.text);
+        bankMinimum.Value = int.Parse(bankMinimumField.text);
         piggyBack.Value = piggyBackToggle.isOn ? 1 : 0;
         fourOfAKindDbl.Value = fourOfAKindDblToggle.isOn ? 1 : 0;
         fiveOfAKindDbl.Value = fiveOfAKindDblToggle.isOn ? 1 : 0;

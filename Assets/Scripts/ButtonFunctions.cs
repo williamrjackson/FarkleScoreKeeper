@@ -15,6 +15,7 @@ public class ButtonFunctions : MonoBehaviour
     public AudioClip clickAudio;
     public AudioSource audioSource;
     public Button piggyBackButton;
+    public Button undoButton;
 
     private EditPlayerName currentPlayer;
 
@@ -38,7 +39,7 @@ public class ButtonFunctions : MonoBehaviour
                 players[i].name.color = Color.black;
             }
         }    
-        scoreStack.Clear();
+        Clear();
     }
 
     void Start()
@@ -77,11 +78,18 @@ public class ButtonFunctions : MonoBehaviour
         if (scoreStack.Count == 0)
         {
             editField.text = "";
+            undoButton.gameObject.SetActive(false);
             return;
         }
         string lastScore = scoreStack.Pop().ToString();
 
-        editField.text = (lastScore == "0") ? "" : lastScore;
+        if (lastScore == "0")
+        {
+            editField.text = "";
+            undoButton.gameObject.SetActive(false);
+            return;
+        } 
+        editField.text = lastScore;
     }
 
     public void AddPlayer(string initialName)
@@ -147,7 +155,8 @@ public class ButtonFunctions : MonoBehaviour
 
         int toAdd;
         int.TryParse(editField.text, out toAdd);
-        if (toAdd == 0) return;
+        if (toAdd < Settings.bankMinimum.Value) return;
+
         int sum = (currentPlayer.score + toAdd);
         SetScore(sum);
         StartCoroutine(GradualFill(currentPlayer.fill, sum));
@@ -334,7 +343,9 @@ public class ButtonFunctions : MonoBehaviour
         int newScore = currentScore + increase;
         editField.text = newScore.ToString();
         scoreStack.Push(currentScore);
+        if (newScore > 0) undoButton.gameObject.SetActive(true);
     }
+
     public void Backspace()
     {
         audioSource.PlayOneShot(clickAudio);
@@ -346,6 +357,7 @@ public class ButtonFunctions : MonoBehaviour
         audioSource.PlayOneShot(clickAudio);
         editField.text = "";
         scoreStack.Clear();
+        undoButton.gameObject.SetActive(false);
     }
 
 

@@ -162,6 +162,7 @@ MonoBehaviour:
   clickAudio: {fileID: 8300000, guid: 304cf8bf8579f447e8768fb89d50a42d, type: 3}
   audioSource: {fileID: 243319456}
   piggyBackButton: {fileID: 1469899742}
+  undoButton: {fileID: 1735681148}
 --- !u!4 &35724985
 Transform:
   m_ObjectHideFlags: 0
@@ -7934,6 +7935,7 @@ MonoBehaviour:
   twoTripletsField: {fileID: 744191680}
   farklePenaltyField: {fileID: 132007134}
   winningScoreField: {fileID: 2121214380}
+  bankMinimumField: {fileID: 182144968}
   piggyBackToggle: {fileID: 278915954}
   fourOfAKindDblToggle: {fileID: 1594912212}
   fiveOfAKindDblToggle: {fileID: 199999006}
