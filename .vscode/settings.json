@@ -51,5 +51,9 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "FarkleScoreKeeper.sln"
+    "dotnet.defaultSolution": "FarkleScoreKeeper.sln",
+    "cSpell.words": [
+        "farkle",
+        "Farkles"
+    ]
 }

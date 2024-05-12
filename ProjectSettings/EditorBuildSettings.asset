@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/Redesign.unity
-    guid: 74f6b83a460dc49199d37cf87b5ae1b9
+    path: Assets/Scenes/ButtonMultiplierExploration.unity
+    guid: 0ff1ab9bb46fe455698027b015fc4dd6
   m_configObjects: {}

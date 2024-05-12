@@ -14,12 +14,14 @@ public class ButtonFunctions : MonoBehaviour
     public AudioClip bankAudio;
     public AudioClip clickAudio;
     public AudioSource audioSource;
+    public Button piggyBackButton;
 
     private EditPlayerName currentPlayer;
 
     private bool winState = false;
     private List<EditPlayerName> players = new List<EditPlayerName>();
     private Stack<int> scoreStack = new Stack<int>();
+    private int piggyBackAmount = 0;
     private void NextPlayer()
     {
         int nextPlayerIndex = (players.IndexOf(currentPlayer) + 1) % players.Count;
@@ -72,13 +74,14 @@ public class ButtonFunctions : MonoBehaviour
 
     public void Undo()
     {
-        Debug.Log("Undo");
         if (scoreStack.Count == 0)
         {
             editField.text = "";
             return;
         }
-        editField.text = scoreStack.Pop().ToString();
+        string lastScore = scoreStack.Pop().ToString();
+
+        editField.text = (lastScore == "0") ? "" : lastScore;
     }
 
     public void AddPlayer(string initialName)
@@ -122,10 +125,15 @@ public class ButtonFunctions : MonoBehaviour
         Clear();
         NextPlayer();
     }
+    public void Piggyback()
+    {
+        AddToCurrentScore(piggyBackAmount);
+        piggyBackAmount = 0;
+    }
 
     private void FarklePenalty()
     {
-        SetScore(currentPlayer.score - 1000); 
+        SetScore(currentPlayer.score - Settings.farklePenalty.Value); 
         audioSource.PlayOneShot(farklePenaltyAudio);
     }
 
@@ -151,6 +159,12 @@ public class ButtonFunctions : MonoBehaviour
         CheckForWin();
 
         NextPlayer();
+        if (Settings.piggyBack.Value == 1)
+        {
+            piggyBackAmount = toAdd;
+            piggyBackButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = $"Piggyback {piggyBackAmount}?";
+            piggyBackButton.gameObject.SetActive(true);
+        }
     }
 
     private void CheckForWin()
@@ -158,7 +172,7 @@ public class ButtonFunctions : MonoBehaviour
         EditPlayerName potentialWinner = null;
         for (int i = 0; i < players.Count; i++)
         {
-            if (players[i].score >= 10000)
+            if (players[i].score >= Settings.winningScore.Value)
             {
                 if (potentialWinner == null || players[i].score > potentialWinner.score)
                 {
@@ -194,7 +208,6 @@ public class ButtonFunctions : MonoBehaviour
     {
         currentPlayer.score = newScore;
         currentPlayer.scoreText.text = currentPlayer.score.ToString();
-        scoreStack.Push(newScore);
     }
 
     public void AppendDigits(string digits)
@@ -203,13 +216,124 @@ public class ButtonFunctions : MonoBehaviour
         editField.text = editField.text + digits;
     }
 
-    public void AddToCurrentScore(int increase)
+    public void ThreeOfAKind(int value)
+    {
+        switch (value)
+        {
+            case 1:
+                AddToCurrentScore(Settings.threeOnes.Value);
+                break;
+            case 2:
+                AddToCurrentScore(Settings.threeTwos.Value);
+                break;
+            case 3:
+                AddToCurrentScore(Settings.threeThrees.Value);
+                break;
+            case 4:
+                AddToCurrentScore(Settings.threeFours.Value);
+                break;
+            case 5:
+                AddToCurrentScore(Settings.threeFives.Value);
+                break;
+            case 6:
+                AddToCurrentScore(Settings.threeSixes.Value);
+                break;
+        }
+    }
+    public void FourOfaKind(int value)
+    {
+        if (Settings.fourOfAKindDbl.Value == 1)
+        {
+            switch (value)
+            {
+                case 1:
+                    AddToCurrentScore(Settings.threeOnes.Value * 2);
+                    break;
+                case 2:
+                    AddToCurrentScore(Settings.threeTwos.Value * 2);
+                    break;
+                case 3:
+                    AddToCurrentScore(Settings.threeThrees.Value * 2);
+                    break;
+                case 4:
+                    AddToCurrentScore(Settings.threeFours.Value * 2);
+                    break;
+                case 5:
+                    AddToCurrentScore(Settings.threeFives.Value * 2);
+                    break;
+                case 6:
+                    AddToCurrentScore(Settings.threeSixes.Value * 2);
+                    break;
+            }
+        }
+        else
+        {
+            AddToCurrentScore(Settings.fourOfAKind.Value);
+        }
+    }
+    public void FiveOfaKind(int value)
+    {
+        if (Settings.fiveOfAKindDbl.Value == 1)
+        {
+            switch (value)
+            {
+                case 1:
+                    AddToCurrentScore(Settings.threeOnes.Value * 4);
+                    break;
+                case 2:
+                    AddToCurrentScore(Settings.threeTwos.Value * 4);
+                    break;
+                case 3:
+                    AddToCurrentScore(Settings.threeThrees.Value * 4);
+                    break;
+                case 4:
+                    AddToCurrentScore(Settings.threeFours.Value * 4);
+                    break;
+                case 5:
+                    AddToCurrentScore(Settings.threeFives.Value * 4);
+                    break;
+                case 6:
+                    AddToCurrentScore(Settings.threeSixes.Value * 4);
+                    break;
+            }
+        }
+        else
+        {
+            AddToCurrentScore(Settings.fiveOfAKind.Value);
+        }
+    }
+    public void SixOfaKind()
+    {
+        AddToCurrentScore(Settings.sixOfAKind.Value);
+    }
+    public void Straight()
+    {
+        AddToCurrentScore(Settings.straight.Value);
+    }
+    public void ThreePairs()
+    {
+        AddToCurrentScore(Settings.threePairs.Value);
+    }
+    public void FourAndPair()
+    {
+        AddToCurrentScore(Settings.fourAndPair.Value);
+    }
+    public void TwoTriplets()
+    {
+        AddToCurrentScore(Settings.twoTriplets.Value);
+    }
+
+    private void AddToCurrentScore(int increase)
     {
         int currentScore = 0;
+        if (piggyBackButton.gameObject.activeSelf)
+        {
+            piggyBackButton.gameObject.SetActive(false);
+        }
         int.TryParse(editField.text, out currentScore);
         int newScore = currentScore + increase;
         editField.text = newScore.ToString();
-        scoreStack.Push(newScore);
+        scoreStack.Push(currentScore);
     }
     public void Backspace()
     {
@@ -221,13 +345,14 @@ public class ButtonFunctions : MonoBehaviour
     {
         audioSource.PlayOneShot(clickAudio);
         editField.text = "";
+        scoreStack.Clear();
     }
 
 
     private IEnumerator GradualFill(Image filler, int score)
     {
         float initialFill = filler.fillAmount;
-        float targetFill = Mathf.InverseLerp(0, 10000, score);
+        float targetFill = Mathf.InverseLerp(0, Settings.winningScore.Value, score);
         float duration = 1f;
         float elapsedTime = 0f;
         while (elapsedTime < duration)
