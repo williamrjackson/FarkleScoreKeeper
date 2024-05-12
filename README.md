@@ -1,5 +1,5 @@
 # FarkleScoreKeeper
 
-Brute-force, undesigned Farkle score keeper.    
+Farkle score keeper.    
 
-![screenshot](screenshot.PNG)
+![screenshot](v2screenshot.jpeg)

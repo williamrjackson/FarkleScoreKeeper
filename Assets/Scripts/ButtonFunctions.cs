@@ -19,8 +19,8 @@ public class ButtonFunctions : MonoBehaviour
 
     private bool winState = false;
     private List<EditPlayerName> players = new List<EditPlayerName>();
-
-    private void TogglePlayer()
+    private Stack<int> scoreStack = new Stack<int>();
+    private void NextPlayer()
     {
         int nextPlayerIndex = (players.IndexOf(currentPlayer) + 1) % players.Count;
         currentPlayer = players[nextPlayerIndex];
@@ -36,6 +36,7 @@ public class ButtonFunctions : MonoBehaviour
                 players[i].name.color = Color.black;
             }
         }    
+        scoreStack.Clear();
     }
 
     void Start()
@@ -67,6 +68,17 @@ public class ButtonFunctions : MonoBehaviour
             players[i].fill.fillAmount = 0f;
         }
         winState = false;
+    }
+
+    public void Undo()
+    {
+        Debug.Log("Undo");
+        if (scoreStack.Count == 0)
+        {
+            editField.text = "";
+            return;
+        }
+        editField.text = scoreStack.Pop().ToString();
     }
 
     public void AddPlayer(string initialName)
@@ -107,7 +119,8 @@ public class ButtonFunctions : MonoBehaviour
         }
 
         CheckForWin();
-        TogglePlayer();
+        Clear();
+        NextPlayer();
     }
 
     private void FarklePenalty()
@@ -137,7 +150,7 @@ public class ButtonFunctions : MonoBehaviour
 
         CheckForWin();
 
-        TogglePlayer();
+        NextPlayer();
     }
 
     private void CheckForWin()
@@ -181,12 +194,22 @@ public class ButtonFunctions : MonoBehaviour
     {
         currentPlayer.score = newScore;
         currentPlayer.scoreText.text = currentPlayer.score.ToString();
+        scoreStack.Push(newScore);
     }
 
     public void AppendDigits(string digits)
     {
         audioSource.PlayOneShot(clickAudio);
         editField.text = editField.text + digits;
+    }
+
+    public void AddToCurrentScore(int increase)
+    {
+        int currentScore = 0;
+        int.TryParse(editField.text, out currentScore);
+        int newScore = currentScore + increase;
+        editField.text = newScore.ToString();
+        scoreStack.Push(newScore);
     }
     public void Backspace()
     {
