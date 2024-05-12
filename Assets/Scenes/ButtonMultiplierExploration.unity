@@ -17830,13 +17830,13 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1416196686}
   m_TextComponent: {fileID: 1611322832}
   m_Placeholder: {fileID: 0}
-  m_ContentType: 0
+  m_ContentType: 2
   m_InputType: 0
   m_AsteriskChar: 42
-  m_KeyboardType: 0
+  m_KeyboardType: 4
   m_LineType: 0
   m_HideMobileInput: 0
-  m_CharacterValidation: 0
+  m_CharacterValidation: 1
   m_CharacterLimit: 0
   m_OnSubmit:
     m_PersistentCalls:
@@ -17853,7 +17853,7 @@ MonoBehaviour:
   m_Text: 60000
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
-  m_ReadOnly: 1
+  m_ReadOnly: 0
   m_ShouldActivateOnSelect: 1
 --- !u!1 &1420842148
 GameObject:

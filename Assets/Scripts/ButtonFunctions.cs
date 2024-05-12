@@ -46,6 +46,11 @@ public class ButtonFunctions : MonoBehaviour
     {
         AddPlayer("Player 1");
         AddPlayer("Player 2");
+        editField.onValueChanged.AddListener((string s) => 
+        {
+            scoreStack.Push(int.Parse(s));
+            undoButton.gameObject.SetActive(true);
+        });
     }
 
     private void Reset()
@@ -75,9 +80,13 @@ public class ButtonFunctions : MonoBehaviour
 
     public void Undo()
     {
+        if (scoreStack.Count > 0 && editField.text == scoreStack.Peek().ToString())
+        {
+            scoreStack.Pop();
+        }
         if (scoreStack.Count == 0)
         {
-            editField.text = "";
+            editField.SetTextWithoutNotify("");
             undoButton.gameObject.SetActive(false);
             return;
         }
@@ -85,11 +94,11 @@ public class ButtonFunctions : MonoBehaviour
 
         if (lastScore == "0")
         {
-            editField.text = "";
+            editField.SetTextWithoutNotify("");
             undoButton.gameObject.SetActive(false);
             return;
         } 
-        editField.text = lastScore;
+        editField.SetTextWithoutNotify(lastScore);
     }
 
     public void AddPlayer(string initialName)
@@ -342,8 +351,7 @@ public class ButtonFunctions : MonoBehaviour
         int.TryParse(editField.text, out currentScore);
         int newScore = currentScore + increase;
         editField.text = newScore.ToString();
-        scoreStack.Push(currentScore);
-        if (newScore > 0) undoButton.gameObject.SetActive(true);
+        if (scoreStack.Count > 0) undoButton.gameObject.SetActive(true);
     }
 
     public void Backspace()
