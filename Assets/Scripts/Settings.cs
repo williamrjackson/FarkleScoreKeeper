@@ -2,50 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
+using NaughtyAttributes;
 
 public class Settings : MonoBehaviour
 {
-    public TMP_InputField threeOnesField;
-    public TMP_InputField threeTwosField;
-    public TMP_InputField threeThreesField;
-    public TMP_InputField threeFoursField;
-    public TMP_InputField threeFivesField;
-    public TMP_InputField threeSixesField;
-    public TMP_InputField fourOfAKindField;
-    public TMP_InputField fiveOfAKindField;
-    public TMP_InputField sixOfAKindField;
-    public TMP_InputField straightField;
-    public TMP_InputField threePairsField;
-    public TMP_InputField fourAndPairField;
-    public TMP_InputField twoTripletsField;
-    public TMP_InputField farklePenaltyField;
-    public TMP_InputField winningScoreField;
-    public TMP_InputField bankMinimumField;
-    public Toggle piggyBackToggle;
-    public Toggle fourOfAKindDblToggle;
-    public Toggle fiveOfAKindDblToggle;
-    
+    public Setting[] gameSettings;
+
     public static Settings Instance;
-    public static Setting threeOnes;
-    public static Setting threeTwos;
-    public static Setting threeThrees;
-    public static Setting threeFours;
-    public static Setting threeFives;
-    public static Setting threeSixes;
-    public static Setting fourOfAKind;
-    public static Setting fiveOfAKind;
-    public static Setting sixOfAKind;
-    public static Setting straight;
-    public static Setting threePairs;
-    public static Setting fourAndPair;
-    public static Setting twoTriplets;
-    public static Setting piggyBack;
-    public static Setting fourOfAKindDbl;
-    public static Setting fiveOfAKindDbl;
-    public static Setting farklePenalty;
-    public static Setting winningScore;
-    public static Setting bankMinimum;
     
     void Awake ()
     {
@@ -61,96 +24,81 @@ public class Settings : MonoBehaviour
     }
     void Start()
     {
-        threeOnes = new Setting("ThreeOnes", 300);
-        threeTwos = new Setting("ThreeTwos", 200);
-        threeThrees = new Setting("ThreeThrees", 300);
-        threeFours = new Setting("ThreeFours", 400);
-        threeFives = new Setting("ThreeFives", 500);
-        threeSixes = new Setting("ThreeSixes", 600);
-        fourOfAKind = new Setting("FourOfaKind", 1000);
-        fiveOfAKind = new Setting("FiveOfaKind", 2000);
-        sixOfAKind = new Setting("SixOfaKind", 3000);
-        straight = new Setting("Straight", 1500);
-        threePairs = new Setting("ThreePairs", 1500);
-        fourAndPair = new Setting("FourAndPair", 1500);
-        twoTriplets = new Setting("TwoTriplets", 2500);
-        piggyBack = new Setting("PiggyBack", 0);
-        fourOfAKindDbl = new Setting("FourOfaKindDouble", 0);
-        fiveOfAKindDbl = new Setting("FiveOfaKindDouble", 0);
-        farklePenalty = new Setting("FarklePenalty", 500);
-        winningScore = new Setting("WinningScore", 10000);
-        bankMinimum = new Setting("BankMinimum", 250);
-        UpdateSettingsGUI();
+        foreach (Setting setting in gameSettings)
+        {
+            setting.Init();
+        }
     }
-
-    public void UpdateSettingsGUI()
+    public static int GetSetting(string name)
     {
-        threeOnesField.text = threeOnes.Value.ToString();
-        threeTwosField.text = threeTwos.Value.ToString();
-        threeThreesField.text = threeThrees.Value.ToString();
-        threeFoursField.text = threeFours.Value.ToString();
-        threeFivesField.text = threeFives.Value.ToString();
-        threeSixesField.text = threeSixes.Value.ToString();
-        fourOfAKindField.text = fourOfAKind.Value.ToString();
-        fourOfAKindField.interactable = fourOfAKindDbl.Value == 0;
-        fiveOfAKindField.text = fiveOfAKind.Value.ToString();
-        fiveOfAKindField.interactable = fiveOfAKindDbl.Value == 0;
-        sixOfAKindField.text = sixOfAKind.Value.ToString();
-        straightField.text = straight.Value.ToString();
-        threePairsField.text = threePairs.Value.ToString();
-        fourAndPairField.text = fourAndPair.Value.ToString();
-        twoTripletsField.text = twoTriplets.Value.ToString();
-        farklePenaltyField.text = farklePenalty.Value.ToString();
-        winningScoreField.text = winningScore.Value.ToString();
-        piggyBackToggle.isOn = piggyBack.Value == 1;
-        fourOfAKindDblToggle.isOn = fourOfAKindDbl.Value == 1;
-        fiveOfAKindDblToggle.isOn = fiveOfAKindDbl.Value == 1;
-        bankMinimumField.text = bankMinimum.Value.ToString();
+        Setting setting = System.Array.Find(Instance.gameSettings, s => s.Name == name);
+        if (setting == null)
+        {
+            Debug.LogWarning("Setting " + name + " not found.");
+            return 0;
+        }
+        return setting.Value;
     }
-    public void SaveSettingsFromGUI()
+    public void GuiFromSettings()
     {
-        threeOnes.Value = int.Parse(threeOnesField.text);
-        threeTwos.Value = int.Parse(threeTwosField.text);
-        threeThrees.Value = int.Parse(threeThreesField.text);
-        threeFours.Value = int.Parse(threeFoursField.text);
-        threeFives.Value = int.Parse(threeFivesField.text);
-        threeSixes.Value = int.Parse(threeSixesField.text);
-        fourOfAKind.Value = int.Parse(fourOfAKindField.text);
-        fiveOfAKind.Value = int.Parse(fiveOfAKindField.text);
-        sixOfAKind.Value = int.Parse(sixOfAKindField.text);
-        straight.Value = int.Parse(straightField.text);
-        threePairs.Value = int.Parse(threePairsField.text);
-        fourAndPair.Value = int.Parse(fourAndPairField.text);
-        twoTriplets.Value = int.Parse(twoTripletsField.text);
-        farklePenalty.Value = int.Parse(farklePenaltyField.text);
-        winningScore.Value = int.Parse(winningScoreField.text);
-        bankMinimum.Value = int.Parse(bankMinimumField.text);
-        piggyBack.Value = piggyBackToggle.isOn ? 1 : 0;
-        fourOfAKindDbl.Value = fourOfAKindDblToggle.isOn ? 1 : 0;
-        fiveOfAKindDbl.Value = fiveOfAKindDblToggle.isOn ? 1 : 0;
-        UpdateSettingsGUI();
+        foreach (Setting setting in gameSettings)
+        {
+            setting.UpdateUI();
+        }
+    }
+    
+    public void SettingsFromGui()
+    {
+        foreach (Setting setting in gameSettings)
+        {
+            setting.ApplyUI();
+        }
     }
     public void ResetSettings()
     {
-        foreach (Setting setting in Setting.Settings)
+        foreach (Setting setting in gameSettings)
         {
             setting.Reset();
         }
-        UpdateSettingsGUI();
+        GuiFromSettings();
     }
 
+    [System.Serializable]
     public class Setting 
     {
+        [SerializeField]
         private string _name;
-        private int _value;
+        [SerializeField]
         private int _defaultValue;
+        [SerializeField]
+        private bool _isToggle;
+        public bool IsToggle { get { return _isToggle; } }
+        [SerializeField]
+        [AllowNesting]
+        [HideIf("IsToggle")]
+        private InputField _inputField;
+        [SerializeField]
+        [AllowNesting]
+        [ShowIf("IsToggle")]
+        private Toggle _toggle;
+        [SerializeField]
+        [AllowNesting]
+        [ShowIf("IsToggle")]
+        private ControlInteractivity _controlOther;
+        public bool HideControlOther { get { return _controlOther == ControlInteractivity.Off || !_isToggle; } }
+        [SerializeField]
+        [AllowNesting]
+        [HideIf("HideControlOther")]
+        private Selectable _control;
+        private int _value;
         public int Value
         {
             get { return _value; }
             set 
             { 
-                PlayerPrefs.SetInt(_name, value);
-                this._value = value; 
+                _value = value; 
+                PlayerPrefs.SetInt(_name, _value);
+                UpdateUI();
             }
         }
         public void Reset()
@@ -158,14 +106,64 @@ public class Settings : MonoBehaviour
             Value = _defaultValue;
         }
         public string Name { get { return _name; } }
-        private static List<Setting> settings = new List<Setting>();
-        public static Setting[] Settings { get { return settings.ToArray(); } }
-        public Setting(string name, int defaultValue)
+        private static List<Setting> _settings = new List<Setting>();
+        public void Init()
         {
-            this._name = name;
-            this._defaultValue = defaultValue;
-            Value = PlayerPrefs.GetInt(name, defaultValue);
-            settings.Add(this);
+            if (_settings.Find(s => s.Name == _name) != null)
+            {
+                Debug.LogWarning("Setting " + _name + " already exists. Skipping.");
+                return;
+            }
+            _value = PlayerPrefs.GetInt(_name, _defaultValue);
+            if (this._isToggle && this._toggle != null)
+            {
+                _toggle.onValueChanged.AddListener((v) => Settings.Instance.SettingsFromGui());
+            }
+            else
+            {
+                _inputField.onEndEdit.AddListener((string valUpdate) => { Value = int.Parse(valUpdate); });
+            }
+            _settings.Add(this);
+        }
+        public void UpdateUI()
+        {
+            if (_isToggle && _toggle != null)
+            {
+                _toggle.SetIsOnWithoutNotify(Value == 1);
+                if (_control != null && _controlOther != ControlInteractivity.Off)
+                {
+                    if (_controlOther == ControlInteractivity.Enable)
+                    {
+                        _control.interactable = Value == 1;
+                    }
+                    else if (_controlOther == ControlInteractivity.Disable)
+                    {
+                        _control.interactable = Value == 0;
+                    }
+                }
+            }
+            else if (_inputField != null)
+            {
+                _inputField.SetTextWithoutNotify(Value.ToString());
+            }
+        }
+        public void ApplyUI()
+        {
+            if (_isToggle)
+            {
+                Value = (_toggle != null && _toggle.isOn) ? 1 : 0;
+            }
+            else if (_inputField != null)
+            {
+                Value = int.Parse(_inputField.text);
+            }
+
+        }
+        public enum ControlInteractivity
+        {
+            Off,
+            Enable,
+            Disable
         }
     }
 }

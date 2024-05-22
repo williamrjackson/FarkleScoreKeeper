@@ -27,17 +27,9 @@ public class ButtonFunctions : MonoBehaviour
     {
         int nextPlayerIndex = (players.IndexOf(currentPlayer) + 1) % players.Count;
         currentPlayer = players[nextPlayerIndex];
-
         for (int i = 0; i < players.Count; i++)
         {
-            if (i == nextPlayerIndex)
-            {
-                players[i].name.color = Color.blue;
-            }
-            else
-            {
-                players[i].name.color = Color.black;
-            }
+            players[i].IsCurrentPlayer = i == nextPlayerIndex;
         }    
         Clear();
     }
@@ -48,7 +40,10 @@ public class ButtonFunctions : MonoBehaviour
         AddPlayer("Player 2");
         editField.onValueChanged.AddListener((string s) => 
         {
-            scoreStack.Push(int.Parse(s));
+            if (int.TryParse(s, out int num))
+            {
+                scoreStack.Push(num);
+            }
             undoButton.gameObject.SetActive(true);
         });
     }
@@ -61,16 +56,7 @@ public class ButtonFunctions : MonoBehaviour
 
         for (int i = 0; i < players.Count; i++)
         {
-
-            if (i == 0)
-            {
-                players[i].name.color = Color.blue;
-            }
-            else
-            {
-                players[i].name.color = Color.black;
-            }
-
+            players[i].IsCurrentPlayer = i == 0;
             players[i].scoreText.text = "0";
             players[i].score = 0;
             players[i].fill.fillAmount = 0f;
@@ -104,7 +90,7 @@ public class ButtonFunctions : MonoBehaviour
     public void AddPlayer(string initialName)
     {
         EditPlayerName newPlayer = Instantiate(playerPrefab, playerParent);
-        newPlayer.name.text = initialName;
+        newPlayer.playerName.text = initialName;
         players.Add(newPlayer);
         Reset();
     }
@@ -150,7 +136,11 @@ public class ButtonFunctions : MonoBehaviour
 
     private void FarklePenalty()
     {
-        SetScore(currentPlayer.score - Settings.farklePenalty.Value); 
+        int penalty = Settings.GetSetting("farklePenalty");
+        if (penalty == 0) return;
+        int updatedScore = currentPlayer.score - penalty;
+        SetScore(updatedScore); 
+        StartCoroutine(GradualFill(currentPlayer.fill, updatedScore));
         audioSource.PlayOneShot(farklePenaltyAudio);
     }
 
@@ -164,7 +154,11 @@ public class ButtonFunctions : MonoBehaviour
 
         int toAdd;
         int.TryParse(editField.text, out toAdd);
-        if (toAdd < Settings.bankMinimum.Value) return;
+        if (toAdd < Settings.GetSetting("bankMinimum")) 
+        {
+            Message.Show($"Banked score must be at least {Settings.GetSetting("bankMinimum")} !", Message.MessageType.Urgent, 2f);
+            return;
+        }
 
         int sum = (currentPlayer.score + toAdd);
         SetScore(sum);
@@ -177,7 +171,7 @@ public class ButtonFunctions : MonoBehaviour
         CheckForWin();
 
         NextPlayer();
-        if (Settings.piggyBack.Value == 1)
+        if (Settings.GetSetting("piggyBack") == 1)
         {
             piggyBackAmount = toAdd;
             piggyBackButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = $"Piggyback {piggyBackAmount}?";
@@ -190,7 +184,7 @@ public class ButtonFunctions : MonoBehaviour
         EditPlayerName potentialWinner = null;
         for (int i = 0; i < players.Count; i++)
         {
-            if (players[i].score >= Settings.winningScore.Value)
+            if (players[i].score >= Settings.GetSetting("winningScore"))
             {
                 if (potentialWinner == null || players[i].score > potentialWinner.score)
                 {
@@ -217,7 +211,7 @@ public class ButtonFunctions : MonoBehaviour
         }
         if (loserCount == players.Count - 1)
         {
-            editField.text = potentialWinner.name.text + " Wins!";
+            editField.text = potentialWinner.playerName.text + " Wins!";
             winState = true;
         }
     }
@@ -239,116 +233,115 @@ public class ButtonFunctions : MonoBehaviour
         switch (value)
         {
             case 1:
-                AddToCurrentScore(Settings.threeOnes.Value);
+                AddToCurrentScore(Settings.GetSetting("threeOnes"));
                 break;
             case 2:
-                AddToCurrentScore(Settings.threeTwos.Value);
+                AddToCurrentScore(Settings.GetSetting("threeTwos"));
                 break;
             case 3:
-                AddToCurrentScore(Settings.threeThrees.Value);
+                AddToCurrentScore(Settings.GetSetting("threeThrees"));
                 break;
             case 4:
-                AddToCurrentScore(Settings.threeFours.Value);
+                AddToCurrentScore(Settings.GetSetting("threeFours"));
                 break;
             case 5:
-                AddToCurrentScore(Settings.threeFives.Value);
+                AddToCurrentScore(Settings.GetSetting("threeFives"));
                 break;
             case 6:
-                AddToCurrentScore(Settings.threeSixes.Value);
+                AddToCurrentScore(Settings.GetSetting("threeSixes"));
                 break;
         }
     }
     public void FourOfaKind(int value)
     {
-        if (Settings.fourOfAKindDbl.Value == 1)
+        if (Settings.GetSetting("fourOfAKindDbl") == 1)
         {
             switch (value)
             {
                 case 1:
-                    AddToCurrentScore(Settings.threeOnes.Value * 2);
+                    AddToCurrentScore(Settings.GetSetting("threeOnes") * 2);
                     break;
                 case 2:
-                    AddToCurrentScore(Settings.threeTwos.Value * 2);
+                    AddToCurrentScore(Settings.GetSetting("threeTwos") * 2);
                     break;
                 case 3:
-                    AddToCurrentScore(Settings.threeThrees.Value * 2);
+                    AddToCurrentScore(Settings.GetSetting("threeThrees") * 2);
                     break;
                 case 4:
-                    AddToCurrentScore(Settings.threeFours.Value * 2);
+                    AddToCurrentScore(Settings.GetSetting("threeFours") * 2);
                     break;
                 case 5:
-                    AddToCurrentScore(Settings.threeFives.Value * 2);
+                    AddToCurrentScore(Settings.GetSetting("threeFives") * 2);
                     break;
                 case 6:
-                    AddToCurrentScore(Settings.threeSixes.Value * 2);
+                    AddToCurrentScore(Settings.GetSetting("threeSixes") * 2);
                     break;
             }
         }
         else
         {
-            AddToCurrentScore(Settings.fourOfAKind.Value);
+            AddToCurrentScore(Settings.GetSetting("fourOfAKind"));
         }
     }
     public void FiveOfaKind(int value)
     {
-        if (Settings.fiveOfAKindDbl.Value == 1)
+        if (Settings.GetSetting("fiveOfAKindDbl") == 1)
         {
             switch (value)
             {
                 case 1:
-                    AddToCurrentScore(Settings.threeOnes.Value * 4);
+                    AddToCurrentScore(Settings.GetSetting("threeOnes") * 4);
                     break;
                 case 2:
-                    AddToCurrentScore(Settings.threeTwos.Value * 4);
+                    AddToCurrentScore(Settings.GetSetting("threeTwos") * 4);
                     break;
                 case 3:
-                    AddToCurrentScore(Settings.threeThrees.Value * 4);
+                    AddToCurrentScore(Settings.GetSetting("threeThrees") * 4);
                     break;
                 case 4:
-                    AddToCurrentScore(Settings.threeFours.Value * 4);
+                    AddToCurrentScore(Settings.GetSetting("threeFours") * 4);
                     break;
                 case 5:
-                    AddToCurrentScore(Settings.threeFives.Value * 4);
+                    AddToCurrentScore(Settings.GetSetting("threeFives") * 4);
                     break;
                 case 6:
-                    AddToCurrentScore(Settings.threeSixes.Value * 4);
+                    AddToCurrentScore(Settings.GetSetting("threeSixes") * 4);
                     break;
             }
         }
         else
         {
-            AddToCurrentScore(Settings.fiveOfAKind.Value);
+            AddToCurrentScore(Settings.GetSetting("fiveOfAKind"));
         }
     }
     public void SixOfaKind()
     {
-        AddToCurrentScore(Settings.sixOfAKind.Value);
+        AddToCurrentScore(Settings.GetSetting("sixOfAKind"));
     }
     public void Straight()
     {
-        AddToCurrentScore(Settings.straight.Value);
+        AddToCurrentScore(Settings.GetSetting("straight"));
     }
     public void ThreePairs()
     {
-        AddToCurrentScore(Settings.threePairs.Value);
+        AddToCurrentScore(Settings.GetSetting("threePairs"));
     }
     public void FourAndPair()
     {
-        AddToCurrentScore(Settings.fourAndPair.Value);
+        AddToCurrentScore(Settings.GetSetting("fourAndPair"));
     }
     public void TwoTriplets()
     {
-        AddToCurrentScore(Settings.twoTriplets.Value);
+        AddToCurrentScore(Settings.GetSetting("twoTriplets"));
     }
 
     private void AddToCurrentScore(int increase)
     {
-        int currentScore = 0;
         if (piggyBackButton.gameObject.activeSelf)
         {
             piggyBackButton.gameObject.SetActive(false);
         }
-        int.TryParse(editField.text, out currentScore);
+        int.TryParse(editField.text, out int currentScore);
         int newScore = currentScore + increase;
         editField.text = newScore.ToString();
         if (scoreStack.Count > 0) undoButton.gameObject.SetActive(true);
@@ -363,7 +356,7 @@ public class ButtonFunctions : MonoBehaviour
     public void Clear()
     {
         audioSource.PlayOneShot(clickAudio);
-        editField.text = "";
+        editField.SetTextWithoutNotify("");
         scoreStack.Clear();
         undoButton.gameObject.SetActive(false);
     }
@@ -372,7 +365,7 @@ public class ButtonFunctions : MonoBehaviour
     private IEnumerator GradualFill(Image filler, int score)
     {
         float initialFill = filler.fillAmount;
-        float targetFill = Mathf.InverseLerp(0, Settings.winningScore.Value, score);
+        float targetFill = Mathf.InverseLerp(0, Settings.GetSetting("winningScore"), score);
         float duration = 1f;
         float elapsedTime = 0f;
         while (elapsedTime < duration)
