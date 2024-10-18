@@ -34,7 +34,7 @@ public class Message : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("Multiple Message's instantiated. Component removed from " + gameObject.name + ". Instance already found on " + _instance.gameObject.name + "!");
+            Debug.LogWarning("Multiple \"Message\" componentents instantiated. Component removed from " + gameObject.name + ". Instance already found on " + _instance.gameObject.name + "!");
             Destroy(this);
         }
     }
