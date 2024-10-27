@@ -211,7 +211,7 @@ public class ButtonFunctions : MonoBehaviour
         }
         if (loserCount == players.Count - 1)
         {
-            editField.text = potentialWinner.playerName.text + " Wins!";
+            Message.Show(potentialWinner.playerName.text + " Wins!", Message.MessageType.Info, 3f);
             winState = true;
         }
     }
