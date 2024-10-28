@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -124,7 +125,7 @@ public class ButtonFunctions : MonoBehaviour
             audioSource.PlayOneShot(farkleAudio);
         }
 
-        CheckForWin();
+        if (CheckForWin()) return;
         Clear();
         NextPlayer();
     }
@@ -164,12 +165,11 @@ public class ButtonFunctions : MonoBehaviour
         SetScore(sum);
         StartCoroutine(GradualFill(currentPlayer.fill, sum));
         audioSource.PlayOneShot(bankAudio);
+        if (CheckForWin()) return;
+
+
         Clear();
-
         currentPlayer.consecutiveFarkles = 0;
-
-        CheckForWin();
-
         NextPlayer();
         if (Settings.GetSetting("piggyBack") == 1)
         {
@@ -179,7 +179,7 @@ public class ButtonFunctions : MonoBehaviour
         }
     }
 
-    private void CheckForWin()
+    private bool CheckForWin()
     {
         EditPlayerName potentialWinner = null;
         for (int i = 0; i < players.Count; i++)
@@ -196,24 +196,23 @@ public class ButtonFunctions : MonoBehaviour
         // Nobody's in a potential win state - bail.
         if (potentialWinner == null)
         {
-            return;
+            return false;
         }
 
-        currentPlayer.hasLost = (currentPlayer.score < potentialWinner.score);
-
-        int loserCount = 0;
-        foreach (EditPlayerName player in players)
+        for (int i = 0; i <= players.IndexOf(currentPlayer); i++)
         {
-            if (player.hasLost)
-            {
-                loserCount++;
-            }
+            players[i].hasLost = players[i].score < potentialWinner.score;
         }
-        if (loserCount == players.Count - 1)
+
+        int lossCount = players.Where(p => p.hasLost).Count();
+
+        if (lossCount == players.Count - 1)
         {
-            Message.Show(potentialWinner.playerName.text + " Wins!", Message.MessageType.Info, 3f);
+            Message.Show(potentialWinner.playerName.text + " Wins!", Message.MessageType.Info, 3f, () => Reset());
             winState = true;
+            return true;
         }
+        return false;
     }
 
     private void SetScore(int newScore)
@@ -356,6 +355,8 @@ public class ButtonFunctions : MonoBehaviour
     public void Clear()
     {
         audioSource.PlayOneShot(clickAudio);
+        piggyBackAmount = 0;
+        piggyBackButton.gameObject.SetActive(false);
         editField.SetTextWithoutNotify("");
         scoreStack.Clear();
         undoButton.gameObject.SetActive(false);

@@ -45,7 +45,7 @@ public class Message : MonoBehaviour
         canvasGroup.blocksRaycasts = false;
         canvasGroup.interactable = false;
     }
-    public static void Show(string message, MessageType messageType = MessageType.Info, float duration = 2f)
+    public static void Show(string message, MessageType messageType = MessageType.Info, float duration = 2f, Wrj.Utils.MapToCurve.OnDone onDone = null)
     {
         if (_instance == null)
         {
@@ -56,9 +56,9 @@ public class Message : MonoBehaviour
         {
             _instance.StopCoroutine(showCoroutine);
         }
-        showCoroutine = _instance.StartCoroutine(_instance.ShowCoroutine(message, messageType, duration));
+        showCoroutine = _instance.StartCoroutine(_instance.ShowCoroutine(message, messageType, duration, onDone));
     }
-    private IEnumerator ShowCoroutine(string message, MessageType messageType, float duration)
+    private IEnumerator ShowCoroutine(string message, MessageType messageType, float duration, Wrj.Utils.MapToCurve.OnDone onDone = null)
     {
         canvasGroup.alpha = 0f;
         canvasGroup.blocksRaycasts = true;
@@ -68,7 +68,7 @@ public class Message : MonoBehaviour
         messageText.text = message;
         yield return Wrj.Utils.MapToCurve.Linear.FadeAlpha(canvasGroup, 1, 0.5f);
         yield return new WaitForSeconds(Mathf.Max(1f, duration - 1f));
-        yield return Wrj.Utils.MapToCurve.Linear.FadeAlpha(canvasGroup, 0, 0.5f);
+        yield return Wrj.Utils.MapToCurve.Linear.FadeAlpha(canvasGroup, 0, 0.5f, onDone: onDone);
         canvasGroup.blocksRaycasts = false;
         canvasGroup.interactable = false;
         messageText.text = "";
