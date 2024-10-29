@@ -9,14 +9,14 @@ public class ButtonFunctions : MonoBehaviour
     public InputField editField;
     public EditPlayerName playerPrefab;
     public Transform playerParent;
+    public Button piggyBackButton;
+    public Button undoButton;
     [Header("Audio")]
     public AudioClip farkleAudio;
     public AudioClip farklePenaltyAudio;
     public AudioClip bankAudio;
     public AudioClip clickAudio;
     public AudioSource audioSource;
-    public Button piggyBackButton;
-    public Button undoButton;
 
     private EditPlayerName currentPlayer;
 
